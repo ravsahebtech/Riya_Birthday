@@ -4,13 +4,13 @@ import "./App.css";
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavigating, setIsNavigating] = useState(false);
-  
+
   // Ref to always access the latest currentPage without recreating listener
   const currentPageRef = useRef(currentPage);
-  
+
   // Track last processed message to ignore duplicates
   const lastProcessedMessageRef = useRef(null);
-  
+
   // Update ref whenever currentPage changes
   useEffect(() => {
     currentPageRef.current = currentPage;
@@ -20,14 +20,14 @@ function App() {
   const nextPage = useCallback(() => {
     // Lock navigation if already navigating
     if (isNavigating) return;
-    
+
     // Page boundary check
     if (currentPageRef.current >= 6) return;
-    
+
     // Lock and navigate
     setIsNavigating(true);
-    setCurrentPage(prev => Math.min(prev + 1, 6));
-    
+    setCurrentPage((prev) => Math.min(prev + 1, 6));
+
     // Release lock after transition (slightly longer for safety)
     setTimeout(() => {
       setIsNavigating(false);
@@ -37,10 +37,10 @@ function App() {
   const prevPage = useCallback(() => {
     if (isNavigating) return;
     if (currentPageRef.current <= 1) return;
-    
+
     setIsNavigating(true);
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-    
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+
     setTimeout(() => {
       setIsNavigating(false);
     }, 1000);
@@ -48,10 +48,10 @@ function App() {
 
   const restart = useCallback(() => {
     if (isNavigating) return;
-    
+
     setIsNavigating(true);
     setCurrentPage(1);
-    
+
     setTimeout(() => {
       setIsNavigating(false);
     }, 1000);
@@ -62,18 +62,18 @@ function App() {
     const handleMessage = (event) => {
       // Ignore messages from unknown sources (optional security)
       // if (event.source !== window.parent) return;
-      
+
       const { type } = event.data || {};
-      
+
       // Create a unique ID for this message to detect duplicates
       const messageId = `${type}_${Date.now()}_${Math.random()}`;
-      
+
       // If same message type is already being processed, ignore
       if (lastProcessedMessageRef.current === type) {
-        console.log('⚠️ Duplicate message ignored:', type);
+        console.log("⚠️ Duplicate message ignored:", type);
         return;
       }
-      
+
       if (type === "NEXT_PAGE") {
         // Set last processed message
         lastProcessedMessageRef.current = type;
@@ -115,7 +115,7 @@ function App() {
       }}
     >
       <iframe
-        src={`/page${currentPage}/page${currentPage}.html`}
+        src={`${import.meta.env.BASE_URL}page${currentPage}/page${currentPage}.html`}
         style={{
           width: "100%",
           height: "100%",
