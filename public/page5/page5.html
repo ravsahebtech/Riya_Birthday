@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Box Open</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: radial-gradient(circle at center, #2b1f4a 0%, #1a1735 40%, #0c0b1f 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* top blur */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 25%;
+            background: rgba(0, 0, 0, 0.6);
+            filter: blur(60px);
+        }
+
+        /* bottom blur */
+        body::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 25%;
+            background: rgba(0, 0, 0, 0.6);
+            filter: blur(60px);
+        }
+
+        .video-box {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 9/16;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: 87%;
+            object-fit: cover;
+            transition: opacity 0.8s ease;
+        }
+
+        /* Family photo container - hidden initially */
+        .family-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+            pointer-events: none;
+            padding: 20px;
+        }
+
+        .family-container.show {
+            opacity: 1;
+        }
+
+        .family-container img {
+            max-width: 92%;
+            max-height: 82%;
+            object-fit: contain;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px rgba(255, 215, 0, 0.08);
+        }
+
+        .family-text {
+            color: rgba(255, 248, 235, 0.9);
+            font-family: 'Georgia', serif;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-top: 16px;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            transition: opacity 1s ease 0.3s;
+            font-weight: 300;
+            font-style: italic;
+            padding: 0 20px;
+        }
+
+        .family-container.show .family-text {
+            opacity: 1;
+        }
+
+        /* Simple message - bilkul light */
+        .message {
+            position: fixed;
+            top: 16px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgb(254, 255, 182);
+            font-size: 16.5px;
+            font-family: Arial, sans-serif;
+            letter-spacing: 1px;
+            z-index: 9999;
+            pointer-events: none;
+            text-shadow: 0 0 5px rgb(0, 0, 0);
+        }
+
+        .message.hide {
+            display: none;
+        }
+
+        /* subtle warm vignette overlay for family photo */
+        .vignette {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 60%, rgba(20, 10, 30, 0.3) 100%);
+            opacity: 0;
+            transition: opacity 1s ease;
+            z-index: 2;
+        }
+
+        .vignette.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 480px) {
+            .family-text {
+                font-size: 14px;
+                margin-top: 12px;
+            }
+            .family-container img {
+                max-width: 96%;
+                max-height: 76%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Simple message - chhota aur clean -->
+    <div class="message" id="message">
+        Click Three Times On Box
+    </div>
+
+    <div class="video-box" id="videoBox">
+        <video id="myVideo">
+            <source src="boxOpening.mp4" type="video/mp4">
+        </video>
+
+        <!-- Family photo container (hidden initially) -->
+        <div class="vignette" id="vignette"></div>
+        <div class="family-container" id="familyContainer">
+            <img src="family.jpeg" alt="Riya with family" id="familyImage" />
+            <div class="family-text" id="familyText">
+                The people who make every moment special. ❤️
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('myVideo');
+        const videoBox = document.getElementById('videoBox');
+        const message = document.getElementById('message');
+        const familyContainer = document.getElementById('familyContainer');
+        const vignette = document.getElementById('vignette');
+
+        let clickCount = 0;
+        let clickTimer;
+        let isActive = true;
+        let isFirstClick = true;
+        let transitionStarted = false; // Guard to prevent duplicate transitions
+
+        // ===== VIDEO END HANDLER - NEW FLOW =====
+        video.addEventListener('ended', function () {
+            // Prevent duplicate transitions
+            if (transitionStarted) return;
+            transitionStarted = true;
+
+            // Disable further interaction
+            isActive = false;
+            videoBox.style.cursor = 'default';
+
+            // Fade out video
+            video.style.opacity = '0';
+
+            // After video fades out, show family photo
+            setTimeout(function () {
+                // Hide video completely
+                video.style.display = 'none';
+
+                // Show family photo with fade-in
+                vignette.classList.add('show');
+                familyContainer.classList.add('show');
+
+                // Wait 2 seconds, then navigate to Page 6
+                setTimeout(function () {
+                    window.parent.postMessage({ type: 'NEXT_PAGE' }, '*');
+                }, 2000);
+
+            }, 800); // Match video fade-out duration
+        });
+
+        function vibratePhone(pattern) {
+            if (navigator.vibrate && window.location.protocol === 'https:') {
+                navigator.vibrate(pattern);
+            }
+        }
+
+        videoBox.addEventListener('click', function () {
+            if (!isActive) return;
+
+            // First click - message hide
+            if (isFirstClick) {
+                message.classList.add('hide');
+                isFirstClick = false;
+            }
+
+            vibratePhone(30);
+            clickCount++;
+            clearTimeout(clickTimer);
+
+            if (clickCount === 3) {
+                vibratePhone([50, 30, 50]);
+
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+
+                isActive = false;
+                clickCount = 0;
+                videoBox.style.cursor = 'default';
+                return;
+            }
+
+            clickTimer = setTimeout(function () {
+                clickCount = 0;
+            }, 1000);
+        });
+
+        document.body.addEventListener('touchstart', function () {}, { once: true });
+    </script>
+
+</body>
+
+</html>
