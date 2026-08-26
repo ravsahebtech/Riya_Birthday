@@ -34,6 +34,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify build output
+        run: |
+          echo "===== dist/index.html ====="
+          cat dist/index.html
+          echo "===== files ====="
+          find dist -maxdepth 2 -type f
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
