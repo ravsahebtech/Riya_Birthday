@@ -28,13 +28,13 @@
 
     /* canvas stars */
     #space {
-      /* position: absolute; */
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       z-index: 0;
       pointer-events: none;
+      position: absolute;
     }
 
     /* planets */
@@ -197,11 +197,9 @@
       0% {
         transform: translateY(0px) translateX(0px);
       }
-
       50% {
         transform: translateY(-12px) translateX(6px);
       }
-
       100% {
         transform: translateY(0px) translateX(0px);
       }
@@ -212,7 +210,6 @@
         opacity: 0.4;
         transform: translate(-50%, -50%) scale(0.9);
       }
-
       100% {
         opacity: 0.8;
         transform: translate(-50%, -50%) scale(1.2);
@@ -223,7 +220,6 @@
       0% {
         transform: rotate(0deg);
       }
-
       100% {
         transform: rotate(360deg);
       }
@@ -239,19 +235,71 @@
       0% {
         transform: translateY(0px) scale(1);
       }
-
       100% {
         transform: translateY(-12px) scale(1.02);
       }
     }
 
+    /* ===== BUTTON - FIXED FOR MOBILE ===== */
     .button-container {
+      position: absolute;
       bottom: 4%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      pointer-events: none;
     }
 
     #btn {
-      padding: 5px 30px;
+      padding: 8px 40px;
+      border-radius: 60px;
+      border: 2px solid #ffd700;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+      pointer-events: auto;
       color: gold;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      touch-action: manipulation;
+    }
+
+    #btn.show {
+      display: flex;
+      animation: buttonGlow 1.5s infinite alternate;
+    }
+
+    #btn i {
+      font-size: 20px;
+      color: gold;
+      transition: transform 0.3s ease;
+    }
+
+    #btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 215, 0, 0.2);
+      box-shadow: 0 0 50px gold;
+    }
+
+    @keyframes buttonGlow {
+      0% {
+        box-shadow: 0px 0px 8px rgba(255, 215, 0, 0.4), 0px 0px 16px rgba(255, 215, 0, 0.2);
+      }
+      100% {
+        box-shadow: 0px 0px 16px rgba(255, 215, 0, 0.7), 0px 0px 32px rgba(255, 215, 0, 0.4);
+      }
     }
 
     circle {
@@ -296,14 +344,15 @@
     </svg>
   </div>
 
-  <div class="button-container" onclick="goToNextPage()">
+  <!-- ===== BUTTON - FIXED (no onclick on container) ===== -->
+  <div class="button-container">
     <button id="btn">
       <i class="fa-solid fa-arrow-right"></i>
     </button>
   </div>
 
   <script>
-    (function () {
+    (function() {
       // ---------- GLOBAL DRAG SPARKLES (anywhere) ----------
       const sparkleCanvas = document.getElementById('sparkle-canvas');
       const sCtx = sparkleCanvas.getContext('2d');
@@ -342,7 +391,8 @@
       }
 
       let globalDragging = false;
-      let lastX = 0, lastY = 0;
+      let lastX = 0,
+        lastY = 0;
       let globalHue = 200;
 
       function addSparkles(px, py, count, hueBase) {
@@ -414,6 +464,7 @@
       document.addEventListener('touchstart', (e) => {
         const target = e.target;
         if (target.classList && target.classList.contains('orbiter')) return;
+        if (target.id === 'btn') return; // Button ko ignore karo
         e.preventDefault();
         const touch = e.touches[0];
         startGlobalDrag(touch.clientX, touch.clientY);
@@ -422,6 +473,7 @@
       document.addEventListener('touchmove', (e) => {
         const target = e.target;
         if (target.classList && target.classList.contains('orbiter')) return;
+        if (target.id === 'btn') return;
         e.preventDefault();
         if (!globalDragging) return;
         const touch = e.touches[0];
@@ -431,12 +483,14 @@
       document.addEventListener('touchend', (e) => {
         const target = e.target;
         if (target.classList && target.classList.contains('orbiter')) return;
+        if (target.id === 'btn') return;
         e.preventDefault();
         stopGlobalDrag();
       });
       document.addEventListener('touchcancel', (e) => {
         const target = e.target;
         if (target.classList && target.classList.contains('orbiter')) return;
+        if (target.id === 'btn') return;
         e.preventDefault();
         globalDragging = false;
       });
@@ -445,6 +499,7 @@
       document.addEventListener('mousedown', (e) => {
         const target = e.target;
         if (target.classList && target.classList.contains('orbiter')) return;
+        if (target.id === 'btn') return;
         e.preventDefault();
         startGlobalDrag(e.clientX, e.clientY);
       });
@@ -452,6 +507,7 @@
       document.addEventListener('mousemove', (e) => {
         const target = e.target;
         if (target.classList && target.classList.contains('orbiter')) return;
+        if (target.id === 'btn') return;
         if (!globalDragging) return;
         e.preventDefault();
         moveGlobalDrag(e.clientX, e.clientY);
@@ -460,6 +516,7 @@
       document.addEventListener('mouseup', (e) => {
         const target = e.target;
         if (target.classList && target.classList.contains('orbiter')) return;
+        if (target.id === 'btn') return;
         if (globalDragging) {
           e.preventDefault();
           stopGlobalDrag();
@@ -468,7 +525,8 @@
 
       // ---------- ORBITER-SPECIFIC (preserve colored sparkles) ----------
       let orbiterDragActive = false;
-      let orbiterLastX = 0, orbiterLastY = 0;
+      let orbiterLastX = 0,
+        orbiterLastY = 0;
       let currentOrbiterHue = 280;
 
       const orbiters = [
@@ -574,57 +632,86 @@
       const canvas = document.getElementById('space');
       const ctx = canvas.getContext('2d');
       let stars = [];
+
       function initStars() {
         for (let i = 0; i < 60; i++) stars.push({
-          x: Math.random(), y: Math.random(), size: Math.random() * 2.2 + 0.6,
-          speedX: (Math.random() - 0.5) * 0.0014, speedY: (Math.random() - 0.5) * 0.0014,
-          bright: Math.random() * 0.6 + 0.2, hue: Math.random() * 50 + 210
+          x: Math.random(),
+          y: Math.random(),
+          size: Math.random() * 2.2 + 0.6,
+          speedX: (Math.random() - 0.5) * 0.0014,
+          speedY: (Math.random() - 0.5) * 0.0014,
+          bright: Math.random() * 0.6 + 0.2,
+          hue: Math.random() * 50 + 210
         });
       }
+
       function resizeBg() {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
       }
+
       function drawBg() {
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         stars.forEach(s => {
-          s.x += s.speedX; s.y += s.speedY;
-          if (s.x < 0) s.x = 1; if (s.x > 1) s.x = 0;
-          if (s.y < 0) s.y = 1; if (s.y > 1) s.y = 0;
-          const x = s.x * canvas.width, y = s.y * canvas.height;
-          ctx.beginPath(); ctx.arc(x, y, s.size * 1.5, 0, 2 * Math.PI);
-          ctx.fillStyle = `hsla(${s.hue}, 80%, 70%, 0.15)`; ctx.fill();
-          ctx.beginPath(); ctx.arc(x, y, s.size * 0.8, 0, 2 * Math.PI);
-          ctx.fillStyle = `hsla(${s.hue}, 90%, 85%, ${s.bright})`; ctx.fill();
+          s.x += s.speedX;
+          s.y += s.speedY;
+          if (s.x < 0) s.x = 1;
+          if (s.x > 1) s.x = 0;
+          if (s.y < 0) s.y = 1;
+          if (s.y > 1) s.y = 0;
+          const x = s.x * canvas.width,
+            y = s.y * canvas.height;
+          ctx.beginPath();
+          ctx.arc(x, y, s.size * 1.5, 0, 2 * Math.PI);
+          ctx.fillStyle = `hsla(${s.hue}, 80%, 70%, 0.15)`;
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(x, y, s.size * 0.8, 0, 2 * Math.PI);
+          ctx.fillStyle = `hsla(${s.hue}, 90%, 85%, ${s.bright})`;
+          ctx.fill();
         });
         requestAnimationFrame(drawBg);
       }
       window.addEventListener('resize', resizeBg);
-      resizeBg(); initStars(); drawBg();
+      resizeBg();
+      initStars();
+      drawBg();
     })();
   </script>
 
   <script>
+    // ===== NAVIGATION =====
     function goToNextPage() {
       window.parent.postMessage({ type: 'NEXT_PAGE' }, '*');
     }
-    const btn = document.getElementById('btn');
 
+    const btn = document.getElementById('btn');
     let buttonTimer;
 
     if (buttonTimer) clearTimeout(buttonTimer);
     buttonTimer = setTimeout(() => {
-      btn.classList.add('show');
+      if (btn) btn.classList.add('show');
     }, 30000);
 
-    // Next button pe click handler
-    document.addEventListener('DOMContentLoaded', function () {
+    // ===== FIXED BUTTON HANDLER (Desktop + Mobile both working) =====
+    document.addEventListener('DOMContentLoaded', function() {
       if (btn) {
-        btn.addEventListener('click', goToNextPage);
+        // Desktop click
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          goToNextPage();
+        });
+
+        // Mobile touch (fix)
+        btn.addEventListener('touchend', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          goToNextPage();
+        }, { passive: false });
       }
     });
-
-
   </script>
 </body>
 
